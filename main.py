@@ -9,11 +9,28 @@ from oauth2client.service_account import ServiceAccountCredentials
 # --- STEP 1: THE SCRAPER ---
 def get_top_traders():
     url = "https://api.polymarket.com/profile/leaderboard?period=month&limit=500"
-    response = requests.get(url).json()
-    users = response.get('data', [])
-    top_count = max(int(len(users) * 0.02), 50)
-    return [u['proxyWallet'] for u in users[:top_count]]
+    
+    # This 'header' makes your script look like a Chrome browser
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept": "application/json"
+    }
+    
+    response = requests.get(url, headers=headers)
+    
+    # If the site blocks us, we want to know why instead of crashing
+    if response.status_code != 200:
+        print(f"❌ API Error: Status {response.status_code}. The site might be blocking the script temporarily.")
+        return []
 
+    try:
+        users = response.json().get('data', [])
+        top_count = max(int(len(users) * 0.02), 50)
+        return [u['proxyWallet'] for u in users[:top_count]]
+    except Exception as e:
+        print(f"❌ Failed to parse JSON: {e}")
+        return []
+        
 def get_user_positions(address):
     url = f"https://data-api.polymarket.com/positions?user={address}"
     try:
