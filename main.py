@@ -73,7 +73,7 @@ def main():
                     'Outcome': p.get('outcome'),
                     'Count': 1 # Used for counting consensus
                 })
-        time.sleep(0.1)
+        time.sleep(0.5)
 
     # Process data into a Top 20 list
     df = pd.DataFrame(all_bets)
