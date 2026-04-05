@@ -1,0 +1,25 @@
+name: Polymarket Whale Tracker
+on:
+  schedule:
+    - cron: '0 * * * *'  # This tells GitHub to run every hour on the dot
+  workflow_dispatch:      # This adds a "Run Now" button so you can test it
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install requests pandas gspread oauth2client
+
+      - name: Run script
+        env:
+          GOOGLE_SHEETS_JSON: ${{ secrets.GOOGLE_SHEETS_JSON }}
+        run: python main.py
