@@ -14,21 +14,31 @@ HEADERS = {
 }
 
 def get_top_traders():
-    print("🚀 Identifying top 2% of monthly earners...")
+    print("🚀 Identifying top earners via Gamma API...")
+    # Updated 2026 endpoint for the leaderboard
     url = "https://api.polymarket.com/profile/leaderboard?period=month&limit=100"
     
+    # We must mimic a very specific browser profile to not get blocked
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Origin": "https://polymarket.com",
+        "Referer": "https://polymarket.com/"
+    }
+    
     try:
-        response = requests.get(url, headers=HEADERS, timeout=10)
-        if response.status_code != 200:
-            print(f"❌ Leaderboard Error: {response.status_code}. Response: {response.text[:100]}")
-            return []
+        response = requests.get(url, headers=headers, timeout=15)
         
+        if response.status_code != 200:
+            print(f"❌ Blocked by Polymarket (Status {response.status_code}).")
+            return []
+            
         data = response.json()
         users = data.get('data', [])
-        # Extract the proxy wallets of the top traders
         return [u['proxyWallet'] for u in users if 'proxyWallet' in u]
+        
     except Exception as e:
-        print(f"❌ Critical error in get_top_traders: {e}")
+        print(f"❌ Connection Failed: {e}")
         return []
 
 def get_user_positions(address):
